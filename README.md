@@ -197,4 +197,4 @@ If you encounter any issues:
 
 ---
 
-**Built with ❤️ for university students everywhere** 
+**Built with ❤️ for university students everywhere**
