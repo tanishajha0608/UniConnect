@@ -198,3 +198,39 @@ If you encounter any issues:
 ---
 
 **Built with ❤️ for university students everywhere**
+
+---
+
+## 🚦 **What You Can Do**
+
+### **Option 1: Use an Organization**
+- If you have access to an organization (like `EcoCar-CAV`), you can fork the repo there (if you have permission).
+
+### **Option 2: Duplicate the Repo Manually**
+If you want a new repo under your own account, you can **create a new repository and push your code to it**. Here’s how:
+
+#### **Step-by-Step: Duplicate Your Repo Under Your Account**
+1. **Create a new repository** on GitHub (e.g., `UniConnect-deploy`).
+2. On your local machine, run:
+    ```sh
+    git clone https://github.com/tanishajha0608/UniConnect.git
+    cd UniConnect
+    git remote remove origin
+    git remote add origin https://github.com/tanishajha0608/UniConnect-deploy.git
+    git push -u origin main
+    ```
+3. Now you have a new, independent repo under your account.
+
+### **Option 3: Delete Old Vercel Projects**
+- If you want to keep using the original repo, delete or disconnect old Vercel projects using it until you’re under the 10-project limit.
+
+---
+
+## 💡 **Summary**
+- **You cannot fork your own repo into your own account.**
+- **You can fork to an organization** (if you have permission).
+- **Or, create a new repo and push your code to it** (recommended for your case).
+
+---
+
+Would you like step-by-step help with creating a new repo and pushing your code to it?
