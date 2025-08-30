@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreateRideForm } from "@/components/create-ride-form"
+import { RequestRideModal } from "@/components/request-ride-modal"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, Clock, Users, MapPin, Star, MessageCircle } from "lucide-react"
 import { MockRide, MockMyRide } from "@/lib/mock-data"
@@ -23,6 +24,8 @@ interface RidesClientProps {
 export function RidesClient({ university, rides, myRides }: RidesClientProps) {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState("available")
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
+  const [selectedRide, setSelectedRide] = useState<MockRide | null>(null)
   const { toast } = useToast()
 
   // Check for tab parameter in URL and set active tab
@@ -33,11 +36,16 @@ export function RidesClient({ university, rides, myRides }: RidesClientProps) {
     }
   }, [searchParams])
 
-  const handleRequestRide = (rideId: number) => {
-    toast({
-      title: "UC Demo Mode",
-      description: "This is a UC campus demo. In production, this would request the ride.",
-    })
+  const handleRequestRide = (ride: MockRide) => {
+    console.log("Request ride clicked for:", ride)
+    setSelectedRide(ride)
+    setIsRequestModalOpen(true)
+    console.log("Modal should be open now")
+  }
+
+  const handleCloseRequestModal = () => {
+    setIsRequestModalOpen(false)
+    setSelectedRide(null)
   }
 
   const handleMessage = (rideId: number, driverName: string) => {
@@ -163,7 +171,7 @@ export function RidesClient({ university, rides, myRides }: RidesClientProps) {
                   <CardFooter className="flex gap-2">
                     <Button 
                       className="flex-1" 
-                      onClick={() => handleRequestRide(ride.id)}
+                      onClick={() => handleRequestRide(ride)}
                     >
                       Request Ride
                     </Button>
@@ -294,6 +302,13 @@ export function RidesClient({ university, rides, myRides }: RidesClientProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Request Ride Modal */}
+      <RequestRideModal
+        isOpen={isRequestModalOpen}
+        onClose={handleCloseRequestModal}
+        ride={selectedRide}
+      />
     </div>
   )
 } 
