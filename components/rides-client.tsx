@@ -22,6 +22,7 @@ interface RidesClientProps {
 }
 
 export function RidesClient({ university, rides, myRides }: RidesClientProps) {
+  console.log("RidesClient component rendering")
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState("available")
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
@@ -85,9 +86,39 @@ export function RidesClient({ university, rides, myRides }: RidesClientProps) {
             Find or create rides to local airports from {university.name}
           </p>
         </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => {
+              console.log("TEST BUTTON CLICKED")
+              alert("Test button works!")
+            }}
+            variant="outline"
+          >
+            Test Button
+          </Button>
+          <Button 
+            onClick={() => {
+              console.log("Create New Ride button clicked")
+              console.log("Current activeTab:", activeTab)
+              setActiveTab("create")
+              console.log("Setting activeTab to create")
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            style={{ backgroundColor: '#2563eb' }}
+          >
+            Create New Ride
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs 
+        value={activeTab} 
+        onValueChange={(value) => {
+          console.log("Tab changed to:", value)
+          setActiveTab(value)
+        }} 
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="available">Available Rides</TabsTrigger>
           <TabsTrigger value="my-rides">My Rides</TabsTrigger>

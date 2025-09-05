@@ -13,6 +13,8 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { UC_CAMPUSES } from "@/lib/universities"
 import { useToast } from "@/hooks/use-toast"
+import { validateUCDomain, getUniversityFromEmail } from "@/lib/uc-email-validation"
+import { signUp } from "@/lib/auth"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -32,6 +34,7 @@ export default function SignupPage() {
   })
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [emailError, setEmailError] = useState("")
 
   // Filter universities based on search
   const filteredUniversities = UC_CAMPUSES.filter(uni => 
@@ -43,6 +46,23 @@ export default function SignupPage() {
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setError("") // Clear error on input change
+    
+    // Real-time email validation
+    if (field === "email" && value) {
+      const emailValidation = validateUCDomain(value)
+      if (!emailValidation.isValid) {
+        setEmailError(emailValidation.error || "Invalid email domain. UC system emails only.")
+      } else {
+        setEmailError("")
+        // Auto-select university based on email domain
+        const emailUniversity = getUniversityFromEmail(value)
+        if (emailUniversity) {
+          setSelectedUniversity(emailUniversity)
+        }
+      }
+    } else if (field === "email" && !value) {
+      setEmailError("")
+    }
   }
 
   const handleUniversitySelect = (currentValue: string) => {
@@ -55,6 +75,19 @@ export default function SignupPage() {
     e.preventDefault()
     setError("")
 
+    // Validate UC email domain
+    const emailValidation = validateUCDomain(formData.email)
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error || "Invalid email domain. UC system emails only.")
+      return
+    }
+
+    // Auto-select university based on email domain
+    const emailUniversity = getUniversityFromEmail(formData.email)
+    if (emailUniversity && !selectedUniversity) {
+      setSelectedUniversity(emailUniversity)
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
       return
@@ -66,21 +99,43 @@ export default function SignupPage() {
       return
     }
 
+    // Verify email domain matches selected university
+    if (emailUniversity && emailUniversity !== selectedUniversity) {
+      setError("Email domain must match the selected UC campus")
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      // Simulate a brief delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      toast({
-        title: "UC Account Created! (Demo)",
-        description: "This is a UC campus demo. In production, you would receive a verification email.",
-      })
-      
-      // Redirect to university dashboard
-      router.push(`/${selectedUniversity}/dashboard`)
+      // Create real Supabase account
+      const { data, error } = await signUp(
+        formData.email,
+        formData.password,
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          universityId: "" // Will be determined from email domain
+        }
+      )
+
+      if (error) {
+        setError((error as Error).message || "Failed to create account")
+        return
+      }
+
+      if (data?.user) {
+        toast({
+          title: "UC Account Created!",
+          description: "Please check your email to verify your account before logging in.",
+        })
+        
+        // Redirect to login page
+        router.push("/login")
+      }
     } catch (error) {
-      setError("An unexpected error occurred")
+      console.error("Signup error:", error)
+      setError("An unexpected error occurred. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -129,12 +184,23 @@ export default function SignupPage() {
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="student@uc.edu" 
+                placeholder="student@berkeley.edu" 
                 required 
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
+                className={emailError ? "border-red-500" : ""}
               />
-              {selectedUniversityData && (
+              {emailError && (
+                <p className="text-xs text-red-500">
+                  {emailError}
+                </p>
+              )}
+              {!emailError && selectedUniversityData && (
+                <p className="text-xs text-green-600">
+                  ✓ Valid UC email domain
+                </p>
+              )}
+              {!emailError && !selectedUniversityData && formData.email && (
                 <p className="text-xs text-muted-foreground">
                   Please use your UC campus email address
                 </p>
