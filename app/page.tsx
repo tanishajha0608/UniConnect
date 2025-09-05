@@ -14,6 +14,7 @@ export default function Home() {
             <span className="text-primary text-xl">UniConnect</span>
           </div>
           <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">UC Students Only</span>
             <Link href="/login">
               <Button variant="ghost">Login</Button>
             </Link>
@@ -36,7 +37,7 @@ export default function Home() {
                     <span className="text-primary"> save money</span>
                   </h1>
                   <p className="text-xl text-muted-foreground md:text-2xl">
-                    Connect with students at your university to split ride costs and find the perfect study spots.
+                    Connect with UC students to split ride costs and find the perfect study spots across all UC campuses.
                   </p>
                 </div>
 
@@ -47,7 +48,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-blue-600" />
-                    <span>University verified</span>
+                    <span>UC verified</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-purple-600" />
@@ -86,7 +87,7 @@ export default function Home() {
                 Everything you need for campus life
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                From airport rides to study sessions, UniConnect helps you connect with your university community.
+                From airport rides to study sessions, UniConnect helps you connect with the UC community across all 10 campuses.
               </p>
             </div>
 
@@ -143,11 +144,11 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-base">
-                    All users are verified with university email addresses. Connect safely with your campus community.
+                    All users are verified with UC email addresses. Connect safely with your campus community.
                   </CardDescription>
                   <div className="mt-4 flex items-center gap-2 text-sm text-purple-600 font-medium">
                     <Users className="h-4 w-4" />
-                    University-only access
+                    UC-only access
                   </div>
                 </CardContent>
               </Card>
@@ -168,9 +169,9 @@ export default function Home() {
                 <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">
                   1
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Choose Your University</h3>
+                <h3 className="text-xl font-semibold mb-2">Choose Your UC Campus</h3>
                 <p className="text-muted-foreground">
-                  Select your university from thousands of US institutions and verify with your student email.
+                  Select your UC campus from our 10 University of California locations.
                 </p>
               </div>
 
@@ -190,7 +191,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Connect & Save</h3>
                 <p className="text-muted-foreground">
-                  Meet up with fellow students, share costs, and build lasting connections in your university community.
+                  Meet up with fellow UC students, share costs, and build lasting connections in the UC community.
                 </p>
               </div>
             </div>
@@ -201,13 +202,13 @@ export default function Home() {
         <section className="py-16 md:py-24">
           <div className="container px-4 md:px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">Join thousands of students</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">Join the UC community</h2>
             </div>
 
             <div className="grid gap-8 md:grid-cols-4 text-center">
               <div>
-                <div className="text-4xl font-bold text-primary mb-2">2,500+</div>
-                <div className="text-muted-foreground">Universities Supported</div>
+                <div className="text-4xl font-bold text-primary mb-2">10</div>
+                <div className="text-muted-foreground">UC Campuses</div>
               </div>
               <div>
                 <div className="text-4xl font-bold text-primary mb-2">$50K+</div>
@@ -230,23 +231,10 @@ export default function Home() {
           <div className="container px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">Ready to start saving?</h2>
             <p className="text-xl mb-8 opacity-90">
-              Join your university community today and start sharing rides and study spots.
+              Join the UC community today and start sharing rides and study spots.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button size="lg" variant="secondary" className="text-primary">
-                  Get Started Free
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-primary bg-transparent"
-                >
-                  Sign In
-                </Button>
-              </Link>
+              <UniversitySelector />
             </div>
           </div>
         </section>

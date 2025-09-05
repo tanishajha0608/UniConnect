@@ -3,14 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-interface University {
-  id: string
-  name: string
-  state: string
-  city: string
-  slug: string
-}
+import { University } from "@/lib/universities"
 
 interface MainNavProps {
   university: University

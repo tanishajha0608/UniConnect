@@ -1,5 +1,6 @@
 import { supabase } from "./supabase"
 import type { UserProfile } from "./supabase"
+import { validateUCDomain, getUniversityFromEmail } from "./uc-email-validation"
 
 export async function signUp(
   email: string,
@@ -11,20 +12,35 @@ export async function signUp(
   },
 ) {
   try {
-    // Check if email domain matches university
-    const { data: university } = await supabase
-      .from("universities")
-      .select("email_domain")
-      .eq("id", userData.universityId)
-      .single()
-
-    if (!university) {
-      throw new Error("University not found")
+    // Validate UC email domain using our security system
+    const emailValidation = validateUCDomain(email)
+    if (!emailValidation.isValid) {
+      throw new Error(emailValidation.error || "Invalid email domain. UC system emails only.")
     }
 
-    const emailDomain = email.split("@")[1]
-    if (emailDomain !== university.email_domain) {
-      throw new Error(`Please use your university email address (@${university.email_domain})`)
+    // Get university from email domain
+    const emailUniversity = getUniversityFromEmail(email)
+    if (!emailUniversity) {
+      throw new Error("Could not determine university from email domain")
+    }
+
+    // Map email university slug to university ID
+    const universitySlugToId: Record<string, string> = {
+      'berkeley': 'uc-berkeley',
+      'davis': 'uc-davis', 
+      'ucla': 'ucla',
+      'ucsd': 'uc-san-diego',
+      'uci': 'uc-irvine',
+      'ucsb': 'uc-santa-barbara',
+      'riverside': 'uc-riverside',
+      'ucsc': 'uc-santa-cruz',
+      'merced': 'uc-merced',
+      'ucsf': 'uc-san-francisco'
+    }
+
+    const universityId = universitySlugToId[emailUniversity]
+    if (!universityId) {
+      throw new Error("Invalid university mapping")
     }
 
     // Create auth user
@@ -44,12 +60,12 @@ export async function signUp(
 
     // Create user profile
     if (authData.user) {
-      const { error: profileError } = await supabase.from("user_profiles").insert({
+      const { error: profileError } = await supabase.from("users").insert({
         id: authData.user.id,
         email,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        university_id: userData.universityId,
+        university_id: universityId,
         status: "pending", // Will be verified after email confirmation
       })
 

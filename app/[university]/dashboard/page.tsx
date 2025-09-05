@@ -3,28 +3,14 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Car, BookOpen, Bell, MapPin } from "lucide-react"
 import { notFound } from "next/navigation"
+import { getUniversity } from "@/lib/universities"
 
 interface DashboardPageProps {
   params: { university: string }
 }
 
-async function getUniversity(slug: string) {
-  try {
-    const response = await fetch(`/api/universities/${slug}`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 },
-    })
-
-    if (!response.ok) return null
-    return await response.json()
-  } catch (error) {
-    console.error("Error fetching university:", error)
-    return null
-  }
-}
-
 export default async function DashboardPage({ params }: DashboardPageProps) {
-  const university = await getUniversity(params.university)
+  const university = getUniversity(params.university)
 
   if (!university) {
     notFound()
@@ -52,7 +38,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             <CardDescription className="mb-4">
               Find students to share an Uber with and save up to 75% on your ride to the airport.
             </CardDescription>
-            <Link href={`/${params.university}/rides`}>
+            <Link href={`/${university.slug}/rides`}>
               <Button className="w-full">Find or Create a Ride</Button>
             </Link>
           </CardContent>
@@ -67,7 +53,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             <CardDescription className="mb-4">
               Discover the best places to study on campus with real-time occupancy information.
             </CardDescription>
-            <Link href={`/${params.university}/study-spots`}>
+            <Link href={`/${university.slug}/study-spots`}>
               <Button className="w-full">Find Study Spots</Button>
             </Link>
           </CardContent>
