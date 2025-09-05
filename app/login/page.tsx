@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { signIn } from "@/lib/auth"
+import { validateUCDomain } from "@/lib/uc-email-validation"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -18,15 +19,35 @@ export default function LoginPage() {
   })
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [emailError, setEmailError] = useState("")
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setError("")
+    
+    // Real-time email validation
+    if (field === "email" && value) {
+      const emailValidation = validateUCDomain(value)
+      if (!emailValidation.isValid) {
+        setEmailError(emailValidation.error || "Invalid email domain. UC system emails only.")
+      } else {
+        setEmailError("")
+      }
+    } else if (field === "email" && !value) {
+      setEmailError("")
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    // Validate UC email domain
+    const emailValidation = validateUCDomain(formData.email)
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error || "Invalid email domain. UC system emails only.")
+      return
+    }
 
     // Validation
     if (!formData.email || !formData.password) {
@@ -60,8 +81,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center">
       <Card className="mx-auto max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardTitle className="text-2xl">UC Login</CardTitle>
+          <CardDescription>Enter your UC email below to login to your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -71,15 +92,26 @@ export default function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">UC Email</Label>
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="m@example.edu" 
+                placeholder="student@berkeley.edu" 
                 required 
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
+                className={emailError ? "border-red-500" : ""}
               />
+              {emailError && (
+                <p className="text-xs text-red-500">
+                  {emailError}
+                </p>
+              )}
+              {!emailError && formData.email && (
+                <p className="text-xs text-green-600">
+                  ✓ Valid UC email domain
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
