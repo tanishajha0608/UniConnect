@@ -18,29 +18,39 @@ export async function signUp(
       throw new Error(emailValidation.error || "Invalid email domain. UC system emails only.")
     }
 
-    // Get university from email domain
-    const emailUniversity = getUniversityFromEmail(email)
-    if (!emailUniversity) {
-      throw new Error("Could not determine university from email domain")
-    }
+    // Get university from email domain by querying the database
+    const emailDomain = email.split('@')[1]
+    console.log('Looking for university with email domain:', emailDomain)
+    
+    const { data: university, error: universityError } = await supabase
+      .from('universities')
+      .select('id, name, slug, email_domains')
+      .contains('email_domains', [emailDomain])
+      .single()
 
-    // Map email university slug to university ID
-    const universitySlugToId: Record<string, string> = {
-      'berkeley': 'uc-berkeley',
-      'davis': 'uc-davis', 
-      'ucla': 'ucla',
-      'ucsd': 'uc-san-diego',
-      'uci': 'uc-irvine',
-      'ucsb': 'uc-santa-barbara',
-      'riverside': 'uc-riverside',
-      'ucsc': 'uc-santa-cruz',
-      'merced': 'uc-merced',
-      'ucsf': 'uc-san-francisco'
-    }
+    console.log('University query result:', { university, universityError })
 
-    const universityId = universitySlugToId[emailUniversity]
-    if (!universityId) {
-      throw new Error("Invalid university mapping")
+    let universityId: string
+
+    if (universityError || !university) {
+      // Fallback: try to find by exact domain match in the array
+      const { data: fallbackUniversity, error: fallbackError } = await supabase
+        .from('universities')
+        .select('id, name, slug, email_domains')
+        .or(`email_domains.cs.${emailDomain}`)
+        .single()
+      
+      console.log('Fallback university query result:', { fallbackUniversity, fallbackError })
+      
+      if (fallbackError || !fallbackUniversity) {
+        throw new Error(`Invalid email domain: ${emailDomain}. UC system emails only.`)
+      }
+      
+      universityId = fallbackUniversity.id
+      console.log('Using fallback university:', universityId)
+    } else {
+      universityId = university.id
+      console.log('Using found university:', universityId)
     }
 
     // Create auth user
@@ -60,16 +70,9 @@ export async function signUp(
 
     // Create user profile
     if (authData.user) {
-      const { error: profileError } = await supabase.from("users").insert({
-        id: authData.user.id,
-        email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        university_id: universityId,
-        status: "pending", // Will be verified after email confirmation
-      })
-
-      if (profileError) throw profileError
+      // For now, we'll just create the auth user without additional profile data
+      // The user will be created in Supabase auth.users automatically
+      console.log("User created successfully:", authData.user.id)
     }
 
     return { data: authData, error: null }
@@ -106,14 +109,14 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
     if (!user) return null
 
-    const { data: profile } = await supabase
-      .from("user_profiles")
-      .select(`
-        *,
-        university:universities(*)
-      `)
-      .eq("id", user.id)
-      .single()
+    // For now, return basic user info from auth
+    const profile = {
+      id: user.id,
+      email: user.email,
+      first_name: user.user_metadata?.first_name || '',
+      last_name: user.user_metadata?.last_name || '',
+      university_id: user.user_metadata?.university_id || null
+    }
 
     return profile
   } catch (error) {
@@ -124,7 +127,10 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
 export async function updateProfile(userId: string, updates: Partial<UserProfile>) {
   try {
-    const { data, error } = await supabase.from("user_profiles").update(updates).eq("id", userId).select().single()
+    // For now, update user metadata in auth
+    const { data, error } = await supabase.auth.updateUser({
+      data: updates
+    })
 
     if (error) throw error
 
