@@ -22,3 +22,4 @@ CREATE POLICY "Users can view profiles in their university" ON user_profiles
             SELECT university_id FROM user_profiles WHERE id = auth.uid()
         )
     );
+

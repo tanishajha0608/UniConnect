@@ -120,6 +120,9 @@ export default function SignupPage() {
         }
       )
 
+      console.log("Returned data: ", data)
+      console.log("Returned error: ", error)
+
       if (error) {
         setError((error as Error).message || "Failed to create account")
         return

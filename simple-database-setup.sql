@@ -38,3 +38,4 @@ CREATE POLICY "Universities are viewable by everyone" ON universities
 
 -- 5. Verify setup
 SELECT 'Basic database setup complete! Universities table created.' as status;
+

@@ -44,3 +44,4 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Verify the setup
 SELECT 'Database setup complete!' as status;
+

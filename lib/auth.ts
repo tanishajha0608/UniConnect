@@ -53,6 +53,10 @@ export async function signUp(
       console.log('Using found university:', universityId)
     }
 
+    console.log("First name: ", userData.firstName)
+    console.log("Last name: ", userData.lastName)
+    console.log("University ID: ", universityId)
+
     // Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -61,12 +65,17 @@ export async function signUp(
         data: {
           first_name: userData.firstName,
           last_name: userData.lastName,
-          university_id: userData.universityId,
+          university_id: universityId,
         },
       },
     })
-
-    if (authError) throw authError
+    
+    console.log("Auth data: ", authData)
+    // if (authError) throw authError
+    if (authError) {
+      alert("Error creating auth user: " + authError.message)
+      throw authError
+    }
 
     // Create user profile
     if (authData.user) {

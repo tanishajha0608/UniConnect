@@ -57,3 +57,4 @@ CREATE POLICY "Universities are viewable by everyone" ON universities
     FOR SELECT USING (true);
 
 SELECT 'Universities setup complete!' as status;
+

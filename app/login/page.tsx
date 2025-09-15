@@ -59,7 +59,7 @@ export default function LoginPage() {
 
     try {
       const { data, error: signInError } = await signIn(formData.email, formData.password)
-
+      console.log("Form data:", formData)
       if (signInError) {
         setError(signInError.message || "Invalid email or password")
         return
