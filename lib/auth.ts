@@ -119,12 +119,25 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     if (!user) return null
 
     // For now, return basic user info from auth
-    const profile = {
+    const profile: UserProfile = {
       id: user.id,
-      email: user.email,
+      auth_user_id: user.id,
+      email: user.email || '',
       first_name: user.user_metadata?.first_name || '',
       last_name: user.user_metadata?.last_name || '',
-      university_id: user.user_metadata?.university_id || null
+      avatar_url: user.user_metadata?.avatar_url || '',
+      university_id: user.user_metadata?.university_id || null,
+      verification_status: 'unverified',
+      is_driver: false,
+      driver_license_verified: false,
+      rating: 0,
+      total_ratings: 0,
+      rides_as_driver: 0,
+      rides_as_passenger: 0,
+      study_hours: 0,
+      last_active: new Date().toISOString(),
+      created_at: user.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
     return profile
@@ -134,7 +147,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   }
 }
 
-export async function updateProfile(userId: string, updates: Partial<UserProfile>) {
+export async function updateProfile(_userId: string, updates: Partial<UserProfile>) {
   try {
     // Update user metadata in Supabase Auth
     const { data, error } = await supabase.auth.updateUser({

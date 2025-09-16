@@ -66,13 +66,28 @@ export function EditProfileModal({ user, onProfileUpdate, children }: EditProfil
 
       // Create unique filename
       const fileExt = file.name.split('.').pop()
-      const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
       const filePath = `avatars/${fileName}`
+
+      // First try to create the bucket if it doesn't exist
+      try {
+        await supabase.storage.createBucket('avatars', {
+          public: true,
+          allowedMimeTypes: ['image/*'],
+          fileSizeLimit: 5242880 // 5MB
+        })
+      } catch (bucketError) {
+        // Bucket might already exist, continue
+        console.log('Bucket creation info:', bucketError)
+      }
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
-        .from('user-uploads')
-        .upload(filePath, file)
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
 
       if (uploadError) {
         throw uploadError
@@ -80,14 +95,14 @@ export function EditProfileModal({ user, onProfileUpdate, children }: EditProfil
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('user-uploads')
+        .from('avatars')
         .getPublicUrl(filePath)
 
       setFormData(prev => ({ ...prev, avatarUrl: publicUrl }))
       setSuccess("Photo uploaded successfully!")
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error)
-      setError("Failed to upload photo. Please try again.")
+      setError(`Failed to upload photo: ${error.message || 'Please try again.'}`)
     } finally {
       setUploading(false)
     }

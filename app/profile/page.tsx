@@ -129,7 +129,14 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex h-16 items-center">
+        <div className="container flex h-16 items-center justify-between">
+          <button
+            onClick={() => window.location.href = '/ucsb/dashboard'}
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+          >
+            <Car className="h-8 w-8 text-blue-600" />
+            <span className="text-2xl font-bold text-blue-600">UniConnect</span>
+          </button>
           <h1 className="text-xl font-semibold">Profile</h1>
         </div>
       </header>

@@ -1,10 +1,45 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { UniversitySelector } from "@/components/university-selector"
-import { Car, Users, DollarSign, MapPin, BookOpen, Shield } from "lucide-react"
+import { Car, Users, DollarSign, MapPin, BookOpen, Shield, Loader2 } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getCurrentUser } from "@/lib/auth"
 
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const userData = await getCurrentUser()
+        if (userData) {
+          setIsLoggedIn(true)
+          setUser(userData)
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -14,13 +49,31 @@ export default function Home() {
             <span className="text-primary text-xl">UniConnect</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">UC Students Only</span>
-            <Link href="/login">
-              <Button variant="ghost">Login</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
+            {isLoggedIn && user ? (
+              <>
+                <Link href="/ucsb/dashboard">
+                  <Button variant="ghost">Dashboard</Button>
+                </Link>
+                <Link href="/profile">
+                  <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80">
+                    <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} />
+                    <AvatarFallback className="text-sm">
+                      {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              </>
+            ) : (
+              <>
+                <span className="text-sm text-muted-foreground">UC Students Only</span>
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button>Sign Up</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
