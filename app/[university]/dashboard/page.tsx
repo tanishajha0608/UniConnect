@@ -9,6 +9,7 @@ interface DashboardPageProps {
   params: Promise<{ university: string }>
 }
 
+
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { university: universitySlug } = await params
   const university = getUniversity(universitySlug)

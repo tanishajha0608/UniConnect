@@ -15,6 +15,7 @@ export default function Home() {
 
   const [user, setUser] = useState(null)
 
+
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -25,6 +26,21 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Auth check error:', error)
+        // If there's an auth error, it might be due to Supabase restoration
+        // Clear any cached auth state
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        if (errorMessage.includes('JWT') || 
+            errorMessage.includes('token') || 
+            errorMessage.includes('Refresh Token') ||
+            errorMessage.includes('Invalid Refresh Token')) {
+          try {
+            const { clearAuthState } = await import('@/lib/auth')
+            await clearAuthState()
+            console.log('Auth state cleared due to Supabase restoration')
+          } catch (clearError) {
+            console.error('Error clearing auth state:', clearError)
+          }
+        }
       } finally {
         setLoading(false)
       }
@@ -312,3 +328,4 @@ export default function Home() {
     </div>
   )
 }
+

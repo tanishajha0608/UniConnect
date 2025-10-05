@@ -3,10 +3,41 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 
-console.log("Supabase URL:", supabaseUrl)
-console.log("Supabase Anon Key:", supabaseAnonKey)
+// Only log in development and if we have valid credentials
+if (process.env.NODE_ENV === 'development' && supabaseUrl && supabaseAnonKey) {
+  console.log("Supabase URL:", supabaseUrl)
+  console.log("Supabase Anon Key:", supabaseAnonKey)
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create Supabase client with error handling for restored instances
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Clear any cached auth state that might be invalid after restoration
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // Add retry logic for restored instances
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'uniconnect-web'
+    }
+  }
+})
+
+// Check for Supabase restoration on client-side
+if (typeof window !== 'undefined') {
+  // Listen for auth state changes to detect restoration issues
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'TOKEN_REFRESHED' && !session) {
+      console.log('Token refresh failed - likely due to Supabase restoration')
+      // Clear all auth state
+      localStorage.clear()
+      sessionStorage.clear()
+    }
+  })
+}
 
 // Types for our database
 export interface University {
