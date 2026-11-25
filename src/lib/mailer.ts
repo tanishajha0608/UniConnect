@@ -13,7 +13,7 @@ export async function sendMail(mail: Mail): Promise<void> {
     return;
   }
   const resend = new Resend(key);
-  const from = process.env.EMAIL_FROM ?? "UniConnect <no-reply@uniconnect.app>";
+  const from = process.env.EMAIL_FROM || "UniConnect <onboarding@resend.dev>";
   const { error } = await resend.emails.send({ from, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html });
   if (error) throw new Error(`Email failed: ${error.message}`);
 }
