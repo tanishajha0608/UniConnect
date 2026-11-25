@@ -23,11 +23,16 @@ export async function requestLoginLink(_: FormState, form: FormData): Promise<Fo
   const token = await createLoginToken(email);
   if (!token) return { error: "Too many sign-in links. Try again in an hour." };
   const link = appUrl(`/api/auth/verify?token=${encodeURIComponent(token)}`);
-  await sendMail({
-    to: email,
-    subject: "Your UniConnect sign-in link",
-    text: `Tap to sign in to UniConnect:\n\n${link}\n\nThis link works once and expires in 15 minutes. If you didn't ask for it, ignore this email.`,
-  });
+  try {
+    await sendMail({
+      to: email,
+      subject: "Your UniConnect sign-in link",
+      text: `Tap to sign in to UniConnect:\n\n${link}\n\nThis link works once and expires in 15 minutes. If you didn't ask for it, ignore this email.`,
+    });
+  } catch (e) {
+    console.error("Sign-in email failed:", e);
+    return { error: "We couldn't send the sign-in email right now. Please try again later." };
+  }
   const devLink = !process.env.RESEND_API_KEY && process.env.NODE_ENV !== "production" ? link : undefined;
   return { ok: `We sent a sign-in link to ${email}. It expires in 15 minutes.`, devLink };
 }
